@@ -52,7 +52,7 @@ export default function SignUp() {
   const history = useHistory()
 
   const goToLogin = () => {
-    history.push("/login")
+    history.push("/")
 }
 
 const goToFeedPage = () => {
