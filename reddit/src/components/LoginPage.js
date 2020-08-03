@@ -57,9 +57,9 @@ export default function SignIn() {
     history.push("/register-page")
 }
 
-const goToFeedPage = () => {
-    history.push("/feed")
-}
+// const goToFeedPage = () => {
+//     history.push("/feed")
+// }
 
 const { form, onChange } = useForm({
     email: "",
@@ -130,7 +130,7 @@ const { form, onChange } = useForm({
             variant="contained"
             color="primary"
             className={classes.submit}
-            onClick={goToFeedPage}
+            // onClick={goToFeedPage}
           >
             Entrar
           </Button>
