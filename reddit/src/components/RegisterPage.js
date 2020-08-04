@@ -10,6 +10,9 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { useHistory } from 'react-router-dom';
+import useForm from './useForm';
+import axios from 'axios';
+import { baseURL } from './constants';
 
 function Copyright() {
   return (
@@ -53,9 +56,37 @@ export default function SignUp() {
     history.push('/');
   };
 
-  const goToFeedPage = () => {
-    history.push('/feed');
+  const { form, onChange } = useForm({
+    username:'',
+    email: '',
+    password: '',
+  });
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+
+    onChange(name, value);
   };
+
+  const handleRegister = (event) => {
+    event.preventDefault();
+    const body = {
+      "username": form.username,
+      "email": form.email,
+      "password": form.password,
+    };
+    axios
+      .post(`https://us-central1-labenu-apis.cloudfunctions.net/labEddit/signup`, body)
+      .then((response) => {
+        window.localStorage.setItem('token', response.data.token);
+        history.push('/feed');
+      })
+      .catch((error) => {
+        alert('Dados incorretos.');
+      });
+  };
+
+
 
   return (
     <Container component="main" maxWidth="xs">
@@ -65,17 +96,18 @@ export default function SignUp() {
         <Typography component="h1" variant="h5">
           Cadastre-se
         </Typography>
-        <form className={classes.form} noValidate>
+        <form className={classes.form} noValidate onSubmit={handleRegister}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={12}>
               <TextField
                 autoComplete="fname"
-                name="firstName"
+                name="username"
                 variant="outlined"
                 required
                 fullWidth
                 id="firstName"
                 label="Nome de Usuário"
+                onChange={handleInputChange}
                 autoFocus
               />
             </Grid>
@@ -88,6 +120,7 @@ export default function SignUp() {
                 label="Email"
                 name="email"
                 autoComplete="email"
+                onChange={handleInputChange}
               />
             </Grid>
             <Grid item xs={12}>
@@ -100,6 +133,7 @@ export default function SignUp() {
                 type="password"
                 id="password"
                 autoComplete="current-password"
+                onChange={handleInputChange}
               />
             </Grid>
             <Grid item xs={12}></Grid>
@@ -110,7 +144,6 @@ export default function SignUp() {
             variant="contained"
             color="primary"
             className={classes.submit}
-            onClick={goToFeedPage}
           >
             Cadastrar
           </Button>
