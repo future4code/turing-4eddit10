@@ -3,17 +3,16 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import {useHistory} from 'react-router-dom'
-import useForm from './useForm'
-import axios from 'axios'
+import { useHistory } from 'react-router-dom';
+import useForm from './useForm';
+import axios from 'axios';
+import { baseURL } from './constants';
 
 function Copyright() {
   return (
@@ -51,49 +50,49 @@ const useStyles = makeStyles((theme) => ({
 export default function SignIn() {
   const classes = useStyles();
 
-  const history = useHistory()
+  const history = useHistory();
 
   const goToRegisterPage = () => {
-    history.push("/register-page")
-}
+    history.push('/register-page');
+  };
 
-// const goToFeedPage = () => {
-//     history.push("/feed")
-// }
+  // const goToFeedPage = () => {
+  //     history.push("/feed")
+  // }
 
-const { form, onChange } = useForm({
-    email: "",
-    password: "",
+  const { form, onChange } = useForm({
+    email: '',
+    password: '',
   });
 
-  const handleInputChange = event => {
+  const handleInputChange = (event) => {
     const { name, value } = event.target;
 
     onChange(name, value);
   };
 
-  const baseURL = "https://us-central1-labenu-apis.cloudfunctions.net/labEddit"
-
   const handleLogin = (event) => {
-    event.preventDefault()
+    event.preventDefault();
     const body = {
-        email: form.email,
-        password: form.password
-    }
-    axios.post(`${baseURL}/login`,body).then((response)=>{
-        window.localStorage.setItem("token", response.data.token)
-        history.push("/feed")
-    }).catch((error) => {
-        alert("Seu usuário ou senha estão incorretos.")
-    })
-}
+      email: form.email,
+      password: form.password,
+    };
+    axios
+      .post(`${baseURL}/login`, body)
+      .then((response) => {
+        window.localStorage.setItem('token', response.data.token);
+        history.push('/feed');
+      })
+      .catch((error) => {
+        alert('Seu usuário ou senha estão incorretos.');
+      });
+  };
 
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-        </Avatar>
+        <Avatar className={classes.avatar}></Avatar>
         <Typography component="h1" variant="h5">
           Login
         </Typography>
@@ -137,7 +136,7 @@ const { form, onChange } = useForm({
           <Grid container>
             <Grid item>
               <Link href="#" variant="body2" onClick={goToRegisterPage}>
-                {"Você não possui uma conta? Cadastrar"}
+                {'Você não possui uma conta? Cadastrar'}
               </Link>
             </Grid>
           </Grid>
