@@ -11,7 +11,7 @@ function Router() {
         <Route exact path="/register-page">
           <RegisterPage />
         </Route>
-        <Route exact path="/login">
+        <Route exact path="/">
           <LoginPage />
         </Route>
         <Route exact path="/feed">
