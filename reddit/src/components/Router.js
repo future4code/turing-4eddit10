@@ -3,6 +3,7 @@ import { Switch, Route, BrowserRouter } from 'react-router-dom';
 import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
 import FeedPage from './FeedPage';
+import FeedDetailPage from './FeedDetailPage';
 
 function Router() {
   return (
@@ -17,8 +18,8 @@ function Router() {
         <Route exact path="/feed">
           <FeedPage />
         </Route>
-        <Route exact path="/post/:postId">
-          <p>Eu sou a página de PostID</p>
+        <Route exact path="/fedd/details/:postId">
+          <FeedDetailPage />
         </Route>
       </Switch>
     </BrowserRouter>

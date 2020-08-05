@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { baseURL } from './constants';
 import axios from 'axios';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import styled from 'styled-components'
+import { EatLoading } from 'react-loadingg';
 import { makeStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CardActionArea from "@material-ui/core/CardActionArea";
@@ -12,6 +13,13 @@ import CardMedia from "@material-ui/core/CardMedia";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import useForm from './useForm';
+
+
+const DivContainer = styled.div`
+  display: grid;
+  gap: 20px;
+  justify-items: center;
+`
 
 const useStyles = makeStyles({
   root: {
@@ -27,33 +35,29 @@ const FeedPage = (props) => {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const handleLogout = () => {
+    window.localStorage.clear();
+    history.push("/");
+  };
 
-  const onVoteAdd = (postsId) => {
-    const body = {
-      "direction": 1
+  const putVotes = (postId, decision, userVoteDirection) => {
+    const token = window.localStorage.getItem("token")
+    let body = {};
+    if (userVoteDirection === decision) {
+      body = { direction: 0 };
+    } else {
+      body = { direction: decision};
     }
-    axios.post(`https://us-central1-labenu-apis.cloudfunctions.net/labEddit/posts/${postsId}/vote`,body)
-    .then(() => {
-        console.log("+1")
-    })
-    .catch(() => {
-        alert("Erro ao votar.")
-    })
-}
 
-const onVoteDecrease = (postsId) => {
-  const body = {
-    "direction": -1
-  }
-  axios.post(`https://us-central1-labenu-apis.cloudfunctions.net/labEddit/posts/${postsId}/vote`,body)
-  .then(() => {
-      console.log("-1")
-  })
-  .catch(() => {
-      alert("Erro ao votar.")
-  })
-}
-console.log(posts.id)
+    axios.put(`https://us-central1-labenu-apis.cloudfunctions.net/labEddit/posts/${postId}/vote`, body, {headers: {
+    Authorization: token
+  }}).then(() => {
+        getListPost();
+      })
+      .catch((err) => {
+        alert("Erro ao computar voto!")
+      });
+  };
 
   useEffect(() => {
     if (localStorage.getItem('token') === null) {
@@ -74,7 +78,6 @@ console.log(posts.id)
 
     setIsLoading(true);
     axios.get(`${baseURL}/posts`, axiosConfig).then((response) => {
-      console.log(response.data.posts);
       setPosts(response.data.posts);
       setIsLoading(false);
     });
@@ -112,53 +115,57 @@ console.log(posts.id)
     })
   };
 
+  const onClickDetails = postId => {
+    history.push(`/fedd/details/${postId}`)
+}
+
   return (
-    <Card className={classes.root}>
-      {isLoading && <CircularProgress />}
-      
+    <DivContainer>
+      <Card className={classes.root}>
         
+        {isLoading ? <EatLoading />:
+      
         <CardContent>
-        <form onSubmit={handlePost}>
-          <input placeholder="Título do Post" name="title" onChange={handleInputChange}/>
-          <input placeholder="Escreva seu Post" name="text" onChange={handleInputChange}/>
-          <button>Postar</button>
-        </form>
-        
-        {posts.map((post) => {
-        return (
-          <div key={post.id}>
-            <CardActionArea>
-          <Typography gutterBottom variant="h5" component="h2">
-            {post.username}
-          </Typography>
-          <Typography variant="body2" color="textSecondary" component="p">
-          <p>{post.text}</p>
-          </Typography>
-          </CardActionArea>
-          <CardActions>
-        <Button size="small" color="primary" onClick={() => onVoteDecrease(post.id)}>
-        -
-        </Button>
-        <p>{post.votesCount}</p>
-        <Button size="small" color="primary" onClick={() => onVoteAdd(post.id)}>
-        +
-        </Button>
-        <p>{post.commentsCount}</p>
-        <Button size="small" color="primary">
-          Comentários
-        </Button>
-      </CardActions>
-      <hr/>
+          <form onSubmit={handlePost}>
+            <input placeholder="Título do Post" value={form.title} name="title" onChange={handleInputChange}/>
+            <input placeholder="Escreva seu Post" value={form.text} name="text" onChange={handleInputChange}/>
+            <button>Postar</button>
+          </form>
 
-
-        </div>
-        )
-      })}
+          <button onClick={handleLogout}>Logout</button>
           
+          {posts.map((post) => {
+            return (
+              <div key={post.id}>
+                <CardActionArea onClick={() => onClickDetails(post.id)}>
+                  <Typography gutterBottom variant="h5" component="h2">
+                    <p>{post.username}</p>
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" component="p">
+                    <p>{post.text}</p>
+                  </Typography>
+                </CardActionArea>
+                <CardActions>
+                  <Button size="small" color="primary" onClick={() => putVotes(post.id, -1, post.userVoteDirection)}>
+                    -
+                  </Button>
+                  <p>{post.votesCount}</p>
+                  <Button size="small" color="primary" onClick={() => putVotes(post.id, 1, post.userVoteDirection)}>
+                    +
+                  </Button>
+                  <p>{post.commentsCount}</p>
+                  <Button size="small" color="primary" onClick={() => onClickDetails(post.id)}>
+                    {post.commentsCount <= 1 ? "Comentário" : "Comentários"}
+                  </Button>
+                </CardActions>
+                <hr/>
+              </div>
+            )
+          })}
         </CardContent>
-      
-      
-    </Card>
+        }
+      </Card>
+    </DivContainer>
   );
 }
 
