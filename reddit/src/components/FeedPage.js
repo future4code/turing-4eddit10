@@ -13,12 +13,22 @@ import CardMedia from "@material-ui/core/CardMedia";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import useForm from './useForm';
-
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import Input from '@material-ui/core/Input';
+import TextField from '@material-ui/core/TextField';
 
 const DivContainer = styled.div`
   display: grid;
   gap: 20px;
   justify-items: center;
+`
+
+const FormPost = styled.form`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  height: 200px;
 `
 
 const useStyles = makeStyles({
@@ -35,28 +45,11 @@ const FeedPage = (props) => {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const classes = useStyles(); 
+
   const handleLogout = () => {
     window.localStorage.clear();
     history.push("/");
-  };
-
-  const putVotes = (postId, decision, userVoteDirection) => {
-    const token = window.localStorage.getItem("token")
-    let body = {};
-    if (userVoteDirection === decision) {
-      body = { direction: 0 };
-    } else {
-      body = { direction: decision};
-    }
-
-    axios.put(`https://us-central1-labenu-apis.cloudfunctions.net/labEddit/posts/${postId}/vote`, body, {headers: {
-    Authorization: token
-  }}).then(() => {
-        getListPost();
-      })
-      .catch((err) => {
-        alert("Erro ao computar voto!")
-      });
   };
 
   useEffect(() => {
@@ -68,6 +61,35 @@ const FeedPage = (props) => {
   useEffect(() => {
     getListPost()
   }, []);
+
+  const { form, onChange, resetForm } = useForm({
+    text:'',
+    title: '',
+  });
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+
+    onChange(name, value);
+  };
+
+  const putVotes = (postId, decision, userVoteDirection) => {
+    const token = window.localStorage.getItem("token")
+    let body = {};
+    if (userVoteDirection === decision) {
+      body = { direction: 0 };
+    } else {
+      body = { direction: decision};
+    }
+    axios.put(`https://us-central1-labenu-apis.cloudfunctions.net/labEddit/posts/${postId}/vote`, body, {headers: {
+    Authorization: token
+  }}).then(() => {
+        getListPost();
+      })
+      .catch((err) => {
+        alert("Erro ao computar voto!")
+      });
+  };
 
   const getListPost = () => {
     const axiosConfig = {
@@ -83,20 +105,7 @@ const FeedPage = (props) => {
     });
 
   }
-
-  const classes = useStyles(); 
-
-  const { form, onChange, resetForm } = useForm({
-    text:'',
-    title: '',
-  });
-
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-
-    onChange(name, value);
-  };
-
+  
   const handlePost = event => {
     event.preventDefault();
     const token = window.localStorage.getItem("token")
@@ -126,11 +135,19 @@ const FeedPage = (props) => {
         {isLoading ? <EatLoading />:
       
         <CardContent>
-          <form onSubmit={handlePost}>
-            <input placeholder="Título do Post" value={form.title} name="title" onChange={handleInputChange}/>
-            <input placeholder="Escreva seu Post" value={form.text} name="text" onChange={handleInputChange}/>
-            <button>Postar</button>
-          </form>
+          <FormPost onSubmit={handlePost}>
+            <Input variant="outlined" placeholder="Título do Post" value={form.title} name="title" onChange={handleInputChange} />
+            <TextField 
+              id="outlined-multiline-static"
+              multiline
+              rows={4}
+              variant="outlined"
+              placeholder="Escreva seu Post"
+              value={form.text}
+              name="text" onChange={handleInputChange}
+            />
+            <Button variant="contained" color="primary">Postar</Button>
+          </FormPost>
 
           <button onClick={handleLogout}>Logout</button>
           
@@ -139,6 +156,7 @@ const FeedPage = (props) => {
               <div key={post.id}>
                 <CardActionArea onClick={() => onClickDetails(post.id)}>
                   <Typography gutterBottom variant="h5" component="h2">
+                    <hr/>
                     <p>{post.username}</p>
                   </Typography>
                   <Typography variant="body2" color="textSecondary" component="p">
@@ -146,12 +164,13 @@ const FeedPage = (props) => {
                   </Typography>
                 </CardActionArea>
                 <CardActions>
+
                   <Button size="small" color="primary" onClick={() => putVotes(post.id, -1, post.userVoteDirection)}>
-                    -
+                    {post.userVoteDirection !== 0 && post.userVoteDirection !== 1 ? <ArrowDownwardIcon color="secondary"/> : <ArrowDownwardIcon color="action"/>}
                   </Button>
                   <p>{post.votesCount}</p>
                   <Button size="small" color="primary" onClick={() => putVotes(post.id, 1, post.userVoteDirection)}>
-                    +
+                  {post.userVoteDirection !== 0 && post.userVoteDirection !== -1 ? <ArrowUpwardIcon color="primary"/> : <ArrowUpwardIcon color="action"/>}
                   </Button>
                   <p>{post.commentsCount}</p>
                   <Button size="small" color="primary" onClick={() => onClickDetails(post.id)}>
