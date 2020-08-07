@@ -12,7 +12,6 @@ import Container from '@material-ui/core/Container';
 import { useHistory } from 'react-router-dom';
 import useForm from './useForm';
 import axios from 'axios';
-import { baseURL } from './constants';
 
 function Copyright() {
   return (
@@ -57,7 +56,7 @@ export default function SignUp() {
   };
 
   const { form, onChange } = useForm({
-    username:'',
+    username: '',
     email: '',
     password: '',
   });
@@ -71,12 +70,15 @@ export default function SignUp() {
   const handleRegister = (event) => {
     event.preventDefault();
     const body = {
-      "username": form.username,
-      "email": form.email,
-      "password": form.password,
+      username: form.username,
+      email: form.email,
+      password: form.password,
     };
     axios
-      .post(`https://us-central1-labenu-apis.cloudfunctions.net/labEddit/signup`, body)
+      .post(
+        `https://us-central1-labenu-apis.cloudfunctions.net/labEddit/signup`,
+        body,
+      )
       .then((response) => {
         window.localStorage.setItem('token', response.data.token);
         history.push('/feed');
@@ -85,8 +87,6 @@ export default function SignUp() {
         alert('Dados incorretos.');
       });
   };
-
-
 
   return (
     <Container component="main" maxWidth="xs">
