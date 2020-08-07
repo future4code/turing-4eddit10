@@ -11,7 +11,7 @@ function Header (props){
     return(
         <AppBar position="static">
         <Toolbar>
-            <IconButton edge="start" color="inherit" aria-label="menu">
+            <IconButton edge="start" color="inherit" aria-label="menu" onClick={props.onClickPosts}>
             <MenuIcon />
             </IconButton>
             <Button color="inherit" onClick={props.onClick}>Logout</Button>
