@@ -4,25 +4,22 @@ import axios from 'axios';
 import styled from 'styled-components'
 import useForm from './useForm';
 import { EatLoading } from 'react-loadingg';
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import Button from "@material-ui/core/Button";
+import Input from '@material-ui/core/Input';
+import TextField from '@material-ui/core/TextField';
+import Header from './Header'
 
 const DivVoteComments = styled.div`
     display: flex;
     justify-content: space-evenly;
 `
 
-const InputComment = styled.input`
-    width: 470px;
-    height: 100px;
-    margin-top: 64px;
-`
-
 const FormComment = styled.form`
     display: flex;
     flex-direction: column;
-`
-
-const ButtonComment = styled.button`
-    height: 35px;
+    width: 25%;
 `
 
 const DivVote = styled.div`
@@ -73,6 +70,21 @@ function FeedDetailPage () {
         }
     },[history])
 
+    const { form, onChange, resetForm } = useForm({
+        comment:''
+      });
+    
+      const handleInputChange = (event) => {
+        const { name, value } = event.target;
+    
+        onChange(name, value);
+      };
+
+      const handleLogout = () => {
+        window.localStorage.clear();
+        history.push("/");
+      };
+
     const getPostDetail = () => {
         const token = window.localStorage.getItem("token")
         setIsLoading(true);
@@ -87,17 +99,7 @@ function FeedDetailPage () {
             console.log(error.message)
         })
     }
-
-    const { form, onChange, resetForm } = useForm({
-        comment:''
-      });
-    
-      const handleInputChange = (event) => {
-        const { name, value } = event.target;
-    
-        onChange(name, value);
-      };
-
+   
       const handleComment = event => {
         event.preventDefault();
         const token = window.localStorage.getItem("token")
@@ -123,7 +125,6 @@ function FeedDetailPage () {
         } else {
           body = { direction: decision};
         }
-    
         axios.put(`https://us-central1-labenu-apis.cloudfunctions.net/labEddit/posts/${postId}/comment/${commentId}/vote`, body, {headers: {
         Authorization: token
       }}).then(() => {
@@ -134,41 +135,76 @@ function FeedDetailPage () {
           });
       };
 
+      const putVotes = (postId, decision, userVoteDirection) => {
+        const token = window.localStorage.getItem("token")
+        let body = {};
+        if (userVoteDirection === decision) {
+          body = { direction: 0 };
+        } else {
+          body = { direction: decision};
+        }
+        axios.put(`https://us-central1-labenu-apis.cloudfunctions.net/labEddit/posts/${postDetail.id}/vote`, body, {headers: {
+        Authorization: token
+      }}).then(() => {
+        getPostDetail();
+          })
+          .catch((err) => {
+            alert("Erro ao computar voto!")
+          });
+      };
+
     return(
         <DivContainer>
             {isLoading ? <EatLoading /> :
                 <DivContainer>
+                    <Header onClick={handleLogout}/>
                     <DivPost>
+                        <hr/>
                         <p><strong>{postDetail.username}</strong></p>
-                        <hr/>
                         <p>{postDetail.text}</p>
-                        <hr/>
                         <DivVoteComments>
                             <DivVote>
-                                <button>-</button>
+                                <Button size="small" color="primary" onClick={() => putVotes(postDetail.id, -1, postDetail.userVoteDirection)}>
+                                    {postDetail.userVoteDirection !== 0 && postDetail.userVoteDirection !== 1 ? <ArrowDownwardIcon color="secondary"/> : <ArrowDownwardIcon color="action"/>}
+                                </Button>
                                 <p>{postDetail.votesCount}</p>
-                                <button>+</button>
+                                <Button size="small" color="primary" onClick={() => putVotes(postDetail.id, 1, postDetail.userVoteDirection)}>
+                                    {postDetail.userVoteDirection !== 0 &&  postDetail.userVoteDirection !== -1 ? <ArrowUpwardIcon color="primary"/> : <ArrowUpwardIcon color="action"/>}
+                                </Button>
                             </DivVote>
                             <p>{postDetail.commentsCount} {postDetail.commentsCount <= 1 ? "Comentário" : "Comentários"}</p>
                         </DivVoteComments>
                     </DivPost>
 
                     <FormComment onSubmit={handleComment}>
-                        <InputComment placeholder="Escreva seu comentário" value={form.comment} name="comment" onChange={handleInputChange}/>
-                        <ButtonComment>Comentar</ButtonComment>
+                        <TextField 
+                            id="outlined-multiline-static"
+                            multiline
+                            rows={4}
+                            variant="outlined"
+                            placeholder="Escreva seu comentário"
+                            value={form.comment}
+                            name="comment"
+                            onChange={handleInputChange}
+                        />
+                        <Button variant="contained" color="primary">Comentar</Button>
                     </FormComment>
 
                     {comments.map(comment => {
                         return(
                             <DivPost key={comment.id}>
-                                <p>{comment.username}</p>
+                                <p><strong>{comment.username}</strong></p>
                                 <hr/>
                                 <p>{comment.text}</p>
                                 <hr/>
                                 <DivVoteToComment>
-                                    <button onClick={() => putVotesComment(postDetail.id, comment.id, -1, comment.userVoteDirection)}>-</button>
+                                    <Button size="small" color="primary" onClick={() => putVotesComment(postDetail.id, comment.id, -1, comment.userVoteDirection)}>
+                                        {comment.userVoteDirection !== 0 && comment.userVoteDirection !== 1 ? <ArrowDownwardIcon color="secondary"/> : <ArrowDownwardIcon color="action"/>}
+                                    </Button>
                                     <p>{comment.votesCount}</p>
-                                    <button onClick={() => putVotesComment(postDetail.id, comment.id, 1, comment.userVoteDirection)}>+</button>
+                                    <Button size="small" color="primary" onClick={() => putVotesComment(postDetail.id, comment.id, 1, comment.userVoteDirection)}>
+                                        {comment.userVoteDirection !== 0 && comment.userVoteDirection !== -1 ? <ArrowUpwardIcon color="primary"/> : <ArrowUpwardIcon color="action"/>}
+                                    </Button>
                                 </DivVoteToComment>
                             </DivPost>
                         )
