@@ -17,6 +17,7 @@ import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import Input from '@material-ui/core/Input';
 import TextField from '@material-ui/core/TextField';
+import Header from './Header';
 
 const DivContainer = styled.div`
   display: grid;
@@ -130,6 +131,9 @@ const FeedPage = (props) => {
 
   return (
     <DivContainer>
+      <Header
+          onClick={handleLogout}
+      />
       <Card className={classes.root}>
         
         {isLoading ? <EatLoading />:
@@ -144,12 +148,11 @@ const FeedPage = (props) => {
               variant="outlined"
               placeholder="Escreva seu Post"
               value={form.text}
-              name="text" onChange={handleInputChange}
+              name="text"
+              onChange={handleInputChange}
             />
-            <Button variant="contained" color="primary">Postar</Button>
+            <Button variant="contained" color="primary" type="submit">Postar</Button>
           </FormPost>
-
-          <button onClick={handleLogout}>Logout</button>
           
           {posts.map((post) => {
             return (
